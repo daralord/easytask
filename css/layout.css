@@ -1,0 +1,46 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    min-height: 100vh;
+    background-color: #000000;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+/* Main application layout */
+.todo-app {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 auto;
+}
+/* Mobile layout */
+@media screen and (max-width: 767px) {
+    .todo-app {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+    }
+}
+@media screen and (min-width: 768px) {
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .todo-app {
+        width: 100%;
+        max-width: 450px;
+        min-height: auto;
+        margin: auto;
+    }
+}
