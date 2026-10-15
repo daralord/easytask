@@ -1,114 +1,60 @@
-// EasyTask — Add-task logic (works in desktop and mobile layouts).
-const addTaskForm = document.getElementById('add-task-form');
-const taskInput = document.getElementById('task-input');
-const taskList = document.getElementById('task-list');
-const completedCount = document.getElementById('completed-count');
-const totalCount = document.getElementById('total-count');
-const announcement = document.getElementById('task-announcement');
 
-function updateTaskCounter() {
-  const allTasks = taskList.querySelectorAll('.task-item');
-  const completedTasks = taskList.querySelectorAll('.task-checkbox-input:checked');
-  completedCount.textContent = completedTasks.length;
-  totalCount.textContent = allTasks.length;
-}
+ // EasyTask: Add-task logic for desktop and mobile.
+ // Matches the IDs and class names used in the group's index.html.
+ (() => {
+   const taskInput = document.getElementById('task-input');
+   const addButton = document.getElementById('add-button');
+   const taskList = document.getElementById('task-list');
 
-function createTaskRow(taskName) {
-  const row = document.createElement('li');
-  row.className = 'task-item';
-  row.style.setProperty('--check-color', '#8275c5');
+   if (!taskInput || !addButton || !taskList) {
+     console.warn('EasyTask: missing task input, add button, or task list.');
+     return;
+   }
 
-  const label = document.createElement('label');
-  label.className = 'task-label';
+   function addTask() {
+     const taskName = taskInput.value.trim();
 
-  const checkbox = document.createElement('input');
-  checkbox.className = 'task-checkbox-input';
-  checkbox.type = 'checkbox';
+     // Empty input adds nothing.
+     if (!taskName) return;
 
-  const checkboxDisplay = document.createElement('span');
-  checkboxDisplay.className = 'task-checkbox-visual';
-  checkboxDisplay.setAttribute('aria-hidden', 'true');
+     const row = document.createElement('li');
+     row.className = 'task-row';
 
-  const text = document.createElement('span');
-  text.className = 'task-text';
-  text.textContent = taskName; // Safe: text is not interpreted as HTML.
+     const label = document.createElement('label');
+     label.className = 'task-row__left';
 
-  const menuButton = document.createElement('button');
-  menuButton.type = 'button';
-  menuButton.className = 'task-menu-button';
-  menuButton.setAttribute('aria-label', `Options for ${taskName}`);
-  menuButton.setAttribute('aria-expanded', 'false');
-  const dots = document.createElement('span');
-  dots.setAttribute('aria-hidden', 'true');
-  dots.textContent = '⋮';
-  menuButton.append(dots);
+     const checkbox = document.createElement('input');
+     checkbox.className = 'task-row__checkbox';
+     checkbox.type = 'checkbox';
 
-  label.append(checkbox, checkboxDisplay, text);
-  row.append(label, menuButton);
-  return row;
-}
+     const text = document.createElement('span');
+     text.className = 'task-row__text';
+     text.textContent = taskName;
 
-// Add on + click, or when Enter is pressed in the field.
-addTaskForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const taskName = taskInput.value.trim();
+     const menu = document.createElement('button');
+     menu.className = 'task-row__menu';
+     menu.type = 'button';
+     menu.setAttribute('aria-label', 'Task options');
+     menu.textContent = '⋮';
 
-  if (!taskName) return; // Empty or spaces-only input adds nothing.
+     label.append(checkbox, text);
+     row.append(label, menu);
+     taskList.append(row);
 
-  taskList.appendChild(createTaskRow(taskName));
-  taskInput.value = ''; // Clear after a successful addition.
-  updateTaskCounter();
-  announcement.textContent = `Added task: ${taskName}`;
-  taskInput.focus();
-});
+     // Clear input after adding.
+     taskInput.value = '';
+     taskInput.focus();
+   }
 
-// Change task completion, using event delegation so newly added tasks work too.
-taskList.addEventListener('change', (event) => {
-  if (event.target.matches('.task-checkbox-input')) updateTaskCounter();
-});
+   // Add task when + is clicked.
+   addButton.addEventListener('click', addTask);
 
-// The optional three-dot menu allows a task to be deleted.
-function closeTaskMenus() {
-  taskList.querySelectorAll('.task-popover').forEach((popover) => popover.remove());
-  taskList.querySelectorAll('.task-menu-button[aria-expanded="true"]').forEach((button) => {
-    button.setAttribute('aria-expanded', 'false');
-  });
-}
+   // Add task when Enter is pressed.
+   taskInput.addEventListener('keydown', (event) => {
+     if (event.key === 'Enter') {
+       event.preventDefault();
+       addTask();
+     }
+   });
+ })();
 
-taskList.addEventListener('click', (event) => {
-  const deleteButton = event.target.closest('.delete-button');
-  if (deleteButton) {
-    const row = deleteButton.closest('.task-item');
-    const name = row.querySelector('.task-text').textContent;
-    row.remove();
-    updateTaskCounter();
-    announcement.textContent = `Deleted task: ${name}`;
-    return;
-  }
-
-  const menuButton = event.target.closest('.task-menu-button');
-  if (!menuButton) return;
-
-  const wasOpen = menuButton.getAttribute('aria-expanded') === 'true';
-  closeTaskMenus();
-  if (wasOpen) return;
-
-  const popover = document.createElement('div');
-  popover.className = 'task-popover';
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'delete-button';
-  button.textContent = 'Delete task';
-  popover.append(button);
-  menuButton.closest('.task-item').append(popover);
-  menuButton.setAttribute('aria-expanded', 'true');
-});
-
-document.addEventListener('click', (event) => {
-  if (!event.target.closest('.task-menu-button, .task-popover')) closeTaskMenus();
-});
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeTaskMenus();
-});
-
-updateTaskCounter();
