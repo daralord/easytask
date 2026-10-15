@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EasyTask</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0C0C0C;
+      font-family: 'Inter', sans-serif;
+      color: #FFFFFF;
+    }
+
+    /* Page: centers the design on PC */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .app {
+      width: 430px;
+      max-width: 100%;
+      padding: 34px 0 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Progress card */
+    .progress-card {
+      position: relative;
+      width: 399px;
+      max-width: 100%;
+      height: 187px;
+      background: #040C17;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 34px;
+      margin-bottom: 18px;
+    }
+    .progress-card__title {
+      position: absolute;
+      left: 16px;
+      top: 66px;
+      font-size: 40px;
+      line-height: 48px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .progress-card__date {
+      position: absolute;
+      left: 21px;
+      top: 135px;
+      font-size: 20px;
+      line-height: 20px;
+      font-weight: 700;
+    }
+    .progress-card__counter {
+      position: absolute;
+      right: 13px;
+      top: 35px;
+      width: 116px;
+      height: 117px;
+      border-radius: 500px;
+      background: #FFFFFF;
+      color: #000000;
+      display: grid;
+      place-items: center;
+      font-size: 40px;
+      font-weight: 700;
+    }
+
+    /* Add-task bar */
+    .add-task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 389px;
+      max-width: 100%;
+      padding-right: 8px;
+      margin-bottom: 44px;
+    }
+    .add-task__input {
+      flex: 1 1 337px;
+      min-width: 0;
+      height: 40px;
+      padding: 12px;
+      background: #111112;
+      border: 1px solid #252529;
+      border-radius: 6px;
+      color: #FFFFFF;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      outline: none;
+    }
+    .add-task__input::placeholder { color: #AFABB6; opacity: 1; }
+    .add-task__button {
+      position: relative;
+      flex: 0 0 32px;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 999px;
+      background: #FFFFFF;
+      cursor: pointer;
+    }
+    .add-task__button::before,
+    .add-task__button::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 15px;
+      width: 16px;
+      height: 2px;
+      border-radius: 1px;
+      background: #000000;
+    }
+    .add-task__button::after { transform: rotate(90deg); }
+
+    /* Task list and rows */
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 380px;
+      max-width: 100%;
+    }
+    .task-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 56px;
+      padding: 16px;
+      background: #17171A;
+      border: 1px solid #252529;
+      border-radius: 8px;
+    }
+    .task-row__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+    }
+    .task-row__checkbox {
+      -webkit-appearance: none;
+      appearance: none;
+      display: grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      background: transparent;
+      border: 1px solid var(--c, #BDBDBD);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .task-row__checkbox:checked::after {
+      content: "\2713";
+      font-size: 12px;
+      line-height: 1;
+      color: #6D70D9;
+    }
+    .task-row__text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .task-row__menu {
+      background: none;
+      border: 0;
+      padding: 0 4px;
+      font-size: 20px;
+      line-height: 1;
+      color: #FFFFFF;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="app">
+
+      <section class="progress-card">
+        <h1 class="progress-card__title">Todo Done</h1>
+        <p class="progress-card__date" id="date">12.09.2025</p>
+        <div class="progress-card__counter"><span id="counter">5/8</span></div>
+      </section>
+
+      <div class="add-task">
+        <input class="add-task__input" id="task-input" type="text" placeholder="inpute a new task">
+        <button class="add-task__button" id="add-button" type="button" aria-label="Add task"></button>
+      </div>
+
+      <ul class="task-list" id="task-list"></ul>
+
+    </div>
+  </main>
+
+  <script>
+    const taskList = document.getElementById('task-list');
+    const taskInput = document.getElementById('task-input');
+    const addButton = document.getElementById('add-button');
+    const counter = document.getElementById('counter');
+    const dateEl = document.getElementById('date');
+
+    // Starting rows, same ticks and border colors as the Figma design
+    const startRows = [
+      [true,  '#8983D8'], [false, '#639B91'], [true,  '#BD668A'], [true,  '#8983D8'],
+      [false, '#BDBDBD'], [true,  '#A8A05A'], [false, '#A8A05A'], [true,  '#A8A05A']
+    ];
+
+    function makeRow(text, checked, color) {
+      const row = document.createElement('li');
+      row.className = 'task-row';
+
+      const label = document.createElement('label');
+      label.className = 'task-row__left';
+
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.className = 'task-row__checkbox';
+      box.checked = checked;
+      if (color) box.style.setProperty('--c', color);
+
+      const span = document.createElement('span');
+      span.className = 'task-row__text';
+      span.textContent = text;
+
+      label.append(box, span);
+
+      const menu = document.createElement('button');
+      menu.type = 'button';
+      menu.className = 'task-row__menu';
+      menu.setAttribute('aria-label', 'Task options');
+      menu.innerHTML = '&#8942;';
+
+      row.append(label, menu);
+      return row;
+    }
+
+    function updateCounter() {
+      const all = taskList.querySelectorAll('input[type="checkbox"]').length;
+      const done = taskList.querySelectorAll('input[type="checkbox"]:checked').length;
+      counter.textContent = done + '/' + all;
+    }
+
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+      taskList.appendChild(makeRow(text, false, null));
+      taskInput.value = '';
+      updateCounter();
+    }
+
+    function showDate() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      dateEl.textContent = dd + '.' + mm + '.' + now.getFullYear();
+    }
+
+    startRows.forEach(function (r) {
+      taskList.appendChild(makeRow('Text', r[0], r[1]));
+    });
+
+    addButton.addEventListener('click', addTask);
+    taskInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') addTask();
+    });
+    taskList.addEventListener('change', updateCounter);
+
+    showDate();
+    updateCounter();
+  </script>
+</body>
+</html>
